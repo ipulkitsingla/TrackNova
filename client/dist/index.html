@@ -27,17 +27,20 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
-    <script type="module" crossorigin src="/assets/index-ZzKvK-2G.js"></script>
+    <script type="module" crossorigin src="/assets/index-BD26GNMZ.js"></script>
     <link rel="stylesheet" crossorigin href="/assets/index-DGRKrHh7.css">
   </head>
   <body class="bg-[#0a0f1d] text-slate-100 font-['Plus_Jakarta_Sans',sans-serif] antialiased selection:bg-sky-500 selection:text-white min-h-screen overflow-x-hidden">
     <div id="root"></div>
     <script>
-      // Register PWA Service Worker
+      // Register PWA Service Worker with immediate update check
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
           navigator.serviceWorker.register('/sw.js')
-            .then(reg => console.log('[PWA] Service Worker registered with scope:', reg.scope))
+            .then(reg => {
+              reg.update();
+              console.log('[PWA] Service Worker registered with scope:', reg.scope);
+            })
             .catch(err => console.log('[PWA] Service Worker registration failed:', err));
         });
       }

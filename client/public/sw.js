@@ -1,7 +1,6 @@
-const CACHE_NAME = 'tracknova-cache-v1';
+const CACHE_NAME = 'tracknova-cache-v3';
 const ASSETS_TO_CACHE = [
   '/',
-  '/index.html',
   '/manifest.json',
   '/icons/train-icon.svg',
   '/icons/icon-192.png',
@@ -9,15 +8,14 @@ const ASSETS_TO_CACHE = [
 ];
 
 self.addEventListener('install', (event) => {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('[SW] Pre-caching static assets');
       return cache.addAll(ASSETS_TO_CACHE).catch((err) => {
         console.warn('[SW] Pre-cache item failed', err);
       });
     })
   );
-  self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
@@ -26,61 +24,70 @@ self.addEventListener('activate', (event) => {
       return Promise.all(
         keys.map((key) => {
           if (key !== CACHE_NAME) {
-            console.log('[SW] Removing old cache', key);
+            console.log('[SW] Deleting stale cache:', key);
             return caches.delete(key);
           }
         })
       );
-    })
+    }).then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
-  // For API calls: try network first, then fail gracefully or serve cached if available
+  // 1. API requests: network first, json offline fallback
   if (url.pathname.startsWith('/api/')) {
+    event.respondWith(
+      fetch(event.request).catch(() => {
+        return new Response(
+          JSON.stringify({
+            success: false,
+            offline: true,
+            message: 'You are currently offline.'
+          }),
+          { headers: { 'Content-Type': 'application/json' } }
+        );
+      })
+    );
+    return;
+  }
+
+  // 2. HTML navigation / index document: NETWORK FIRST so code changes are always fresh
+  if (event.request.mode === 'navigate' || url.pathname === '/' || url.pathname.endsWith('.html')) {
     event.respondWith(
       fetch(event.request)
         .then((response) => {
+          if (response && response.status === 200) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+          }
           return response;
         })
         .catch(() => {
-          return new Response(
-            JSON.stringify({
-              success: false,
-              offline: true,
-              message: 'You are currently offline. Check your internet connection.'
-            }),
-            { headers: { 'Content-Type': 'application/json' } }
-          );
+          return caches.match('/index.html') || caches.match('/');
         })
     );
     return;
   }
 
-  // For static assets: cache-first with network fallback
+  // 3. Static Assets: stale-while-revalidate / cache first
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-      return fetch(event.request).then((networkResponse) => {
+      const fetchPromise = fetch(event.request).then((networkResponse) => {
         if (
           networkResponse &&
           networkResponse.status === 200 &&
           event.request.method === 'GET' &&
           !url.protocol.startsWith('chrome-extension')
         ) {
-          const responseToCache = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseToCache);
-          });
+          const clone = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
         }
         return networkResponse;
-      });
+      }).catch(() => null);
+
+      return cachedResponse || fetchPromise;
     })
   );
 });
-

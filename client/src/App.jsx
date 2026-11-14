@@ -13,10 +13,6 @@ import WelcomeScreen from './components/WelcomeScreen';
 import { Loader2, AlertCircle, RefreshCw, WifiOff, Train, ShieldCheck } from 'lucide-react';
 
 export default function App() {
-  // Read initial train from URL query string if present (default to none)
-  const urlParams = new URLSearchParams(window.location.search);
-  const initialTrain = urlParams.get('train') || '';
-
   // Get current date in IST
   const getTodayIST = () => {
     const now = new Date();
@@ -24,10 +20,11 @@ export default function App() {
     return istTime.toISOString().split('T')[0];
   };
 
-  const [trainNumber, setTrainNumber] = useState(initialTrain);
+  // Always start with NO train tracked by default
+  const [trainNumber, setTrainNumber] = useState('');
   const [selectedDate, setSelectedDate] = useState(getTodayIST());
   const [liveData, setLiveData] = useState(null);
-  const [isLoading, setIsLoading] = useState(Boolean(initialTrain));
+  const [isLoading, setIsLoading] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState(null);
   const [popularTrains, setPopularTrains] = useState([]);
@@ -39,6 +36,13 @@ export default function App() {
   const [countdown, setCountdown] = useState(30);
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
   const [deferredPrompt, setDeferredPrompt] = useState(null);
+
+  // Clear query string on mount so browser refresh never retains old train
+  useEffect(() => {
+    if (window.location.search) {
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, []);
 
   // Sync PWA install event
   useEffect(() => {
