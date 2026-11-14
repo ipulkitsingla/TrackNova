@@ -1,0 +1,22 @@
+{
+  "name": "tracknova",
+  "version": "1.0.0",
+  "description": "Mobile-friendly Live Train Tracking PWA powered by Railcore API",
+  "scripts": {
+    "start": "node server/server.js",
+    "server": "node server/server.js",
+    "client": "npm --prefix client run dev",
+    "build": "npm --prefix client run build",
+    "install:all": "npm --prefix server install && npm --prefix client install"
+  },
+  "keywords": [
+    "railcore",
+    "train-tracking",
+    "pwa",
+    "indian-railways",
+    "mern"
+  ],
+  "author": "",
+  "license": "ISC"
+}
+

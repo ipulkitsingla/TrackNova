@@ -1,0 +1,49 @@
+{
+  "name": "TrackNova - Live Train Tracker",
+  "short_name": "TrackNova",
+  "description": "Real-time live train tracking, speed meter, delay prediction & route maps powered by Railcore",
+  "start_url": "/",
+  "id": "/",
+  "display": "standalone",
+  "background_color": "#0a0f1d",
+  "theme_color": "#0a0f1d",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/train-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["travel", "navigation", "utilities"],
+  "shortcuts": [
+    {
+      "name": "Track 12951 Tejas",
+      "short_name": "Tejas Express",
+      "description": "Track New Delhi Tejas Rajdhani Express",
+      "url": "/?train=12951",
+      "icons": [{ "src": "/icons/train-icon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "Track 22436 Vande Bharat",
+      "short_name": "Vande Bharat",
+      "description": "Track Vande Bharat Express",
+      "url": "/?train=22436",
+      "icons": [{ "src": "/icons/train-icon.svg", "sizes": "any" }]
+    }
+  ]
+}
+
