@@ -44,20 +44,22 @@ export default function LiveMap({ liveData }) {
       fadeAnimation: true,
     });
 
-    // Primary Tile Layer: CartoDB Voyager / Dark
+    // Primary Tile Layer: OpenStreetMap (100% Free, No Watermark, No API Key Required)
     const primaryTiles = L.tileLayer(
-      'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+      'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
       {
         maxZoom: 19,
-        subdomains: 'abcd',
+        subdomains: ['a', 'b', 'c'],
+        attribution: '&copy; OpenStreetMap contributors',
       }
     ).addTo(map);
 
-    // Fallback to standard OpenStreetMap if CartoDB fails
+    // Fallback to Esri World Street Map if OSM encounters latency
     primaryTiles.on('tileerror', () => {
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-      }).addTo(map);
+      L.tileLayer(
+        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
+        { maxZoom: 18 }
+      ).addTo(map);
     });
 
     const stationLayer = L.layerGroup().addTo(map);
