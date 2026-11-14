@@ -7,14 +7,19 @@ export default function Navbar({
   onRefresh,
   isRefreshing,
   deferredPrompt,
-  onInstallClick
+  onInstallClick,
+  onHomeClick
 }) {
   return (
     <header className="sticky top-0 z-40 bg-[#0a0f1d]/90 backdrop-blur-md border-b border-slate-800/80 pt-safe px-4 py-3">
       <div className="max-w-4xl mx-auto flex items-center justify-between">
         
-        {/* Brand Logo & Name */}
-        <div className="flex items-center gap-2.5">
+        {/* Brand Logo & Name (Clickable to go Home) */}
+        <button
+          onClick={onHomeClick}
+          className="flex items-center gap-2.5 text-left focus:outline-none group transition-opacity active:opacity-80"
+          title="Go to Home"
+        >
           <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-sky-500 to-blue-700 shadow-lg shadow-sky-500/20 text-white">
             <Train className="w-5 h-5 animate-pulse" />
             <span className="absolute -top-1 -right-1 flex h-3 w-3">
@@ -24,7 +29,7 @@ export default function Navbar({
           </div>
           <div>
             <div className="flex items-center gap-1.5">
-              <span className="text-lg font-black tracking-tight text-white">
+              <span className="text-lg font-black tracking-tight text-white group-hover:text-sky-300 transition-colors">
                 TRACK<span className="text-sky-400">NOVA</span>
               </span>
               <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-sky-500/10 text-sky-400 border border-sky-500/20 uppercase tracking-wider">
@@ -33,7 +38,7 @@ export default function Navbar({
             </div>
             <p className="text-[11px] text-slate-400 font-medium">Real-Time Indian Railways GPS</p>
           </div>
-        </div>
+        </button>
 
         {/* Action Buttons */}
         <div className="flex items-center gap-2">

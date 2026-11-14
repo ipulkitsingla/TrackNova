@@ -9,12 +9,13 @@ import LiveMap from './components/LiveMap';
 import PwaInstallPrompt from './components/PwaInstallPrompt';
 import FavoritesDrawer from './components/FavoritesDrawer';
 import BottomNav from './components/BottomNav';
+import WelcomeScreen from './components/WelcomeScreen';
 import { Loader2, AlertCircle, RefreshCw, WifiOff, Train, ShieldCheck } from 'lucide-react';
 
 export default function App() {
-  // Read initial train from URL query string if present
+  // Read initial train from URL query string if present (default to none)
   const urlParams = new URLSearchParams(window.location.search);
-  const initialTrain = urlParams.get('train') || '12951';
+  const initialTrain = urlParams.get('train') || '';
 
   // Get current date in IST
   const getTodayIST = () => {
@@ -26,7 +27,7 @@ export default function App() {
   const [trainNumber, setTrainNumber] = useState(initialTrain);
   const [selectedDate, setSelectedDate] = useState(getTodayIST());
   const [liveData, setLiveData] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(Boolean(initialTrain));
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState(null);
   const [popularTrains, setPopularTrains] = useState([]);
@@ -97,7 +98,12 @@ export default function App() {
 
   // Fetch Live Train Data
   const fetchLiveData = useCallback(async (isManual = false) => {
-    if (!trainNumber) return;
+    if (!trainNumber) {
+      setIsLoading(false);
+      setLiveData(null);
+      setError(null);
+      return;
+    }
 
     if (isManual) setIsRefreshing(true);
     else setIsLoading(true);
@@ -193,6 +199,7 @@ export default function App() {
 
   const handleSelectTrain = (num) => {
     setTrainNumber(num);
+    setActiveTab('live');
   };
 
   const handleRemoveFavorite = async (num) => {
@@ -202,6 +209,15 @@ export default function App() {
     try {
       await fetch(`/api/favorites/${num}`, { method: 'DELETE' });
     } catch {}
+  };
+
+  const handleHomeClick = () => {
+    setTrainNumber('');
+    setLiveData(null);
+    setError(null);
+    const currentUrl = new URL(window.location.href);
+    currentUrl.searchParams.delete('train');
+    window.history.replaceState({}, '', currentUrl.pathname);
   };
 
   const isFavorite = favorites.some(f => f.trainNumber === trainNumber);
@@ -219,6 +235,7 @@ export default function App() {
 
       {/* App Navbar */}
       <Navbar
+        onHomeClick={handleHomeClick}
         onOpenFavorites={() => setIsDrawerOpen(true)}
         favoritesCount={favorites.length}
         onRefresh={() => fetchLiveData(true)}
@@ -243,6 +260,15 @@ export default function App() {
       {/* Main View Area */}
       <main className="flex-1 w-full max-w-4xl mx-auto py-2">
         
+        {/* Welcome Hero Screen when no train is tracked yet */}
+        {!trainNumber && !liveData && !isLoading && (
+          <WelcomeScreen
+            onSelectTrain={handleSelectTrain}
+            popularTrains={popularTrains}
+            history={history}
+          />
+        )}
+
         {/* Loading Spinner */}
         {isLoading && !liveData && (
           <div className="flex flex-col items-center justify-center py-20 px-4">
